@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+    <link rel="stylesheet" href="css/design.css">
+</head>
+<body>
+	<div id="header">
+		<img src="img/c02.png" id="badge">
+	</div>
+	<div id="inner">
+		<input class="slide" type="range" min="0" max="7" step="1" value="0" oninput="showVal(this.value)">
+		<p>Change C02 levels with slider.</p>
+	</div>
+	<script src=”js/three.min.js”></script>
+	<script src=”js/ColladaLoader.js”></script>
+	<script src=”js/tween.min.js”></script>
+	<script src=’js/postprocessing/EffectComposer.js’></script>
+	<script src=’js/postprocessing/RenderPass.js’></script>
+	<script src=’js/postprocessing/ShaderPass.js’></script>
+	<script src=’js/postprocessing/MaskPass.js’></script>	
+</body>
+</html>
