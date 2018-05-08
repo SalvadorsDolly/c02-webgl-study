@@ -114,4 +114,23 @@ function init() {
 		// render scene
 		render();
 	});
-};
+
+	// final init section to set mouse movement interaction with camera
+	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+	window.addEventListener( 'resize', onWindowResize, false );
+ }
+ 	// render fuction set frame rate to 60 fps if possible, the models rotate slowly as a group and camera 
+ 	//position rendering is updated with each mouse movement while staying locked to center.
+ 	function render() {
+ 		requestAnimationFrame( renderer );
+ 		group.rotate.y += 0.005;
+ 		camera.position.x += 5 + ( (mouseX / 4) + 200 - camera.position.x ) * 0.05;
+ 		camera.position.y += 8 + ( -(mouseY / 4) - camera.position.y ) * 0.05;
+ 		camera.lookAt( scene.position );
+ 		shaderTime += 0.1;
+ 		filmPass.uniforms[ 'time' ].value = shaderTime;
+ 		composer.render( 0.1 );
+ 		TWEEN.update();
+ 	}
