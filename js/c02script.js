@@ -9,8 +9,8 @@ var SCREEN_WIDTH = window.innerWidth,
     camera, scene, renderer, water, waterHt = 1;
 
 var textureLoader = new THREE.TextureLoader();
-var composer, shaderTime = 0, 
-	filmPass, renderPass, copyPass, effectVignette, group, lastVal = 0;
+var composer, shaderTime = 0,
+    filmPass, renderPass, copyPass, effectVignette, group, lastVal = 0;
 
 // initialize scene
 
@@ -39,15 +39,17 @@ function init() {
 	var light = new THREE.HemisphereLight(0xa1e2f5, 0x6f4d25, 0.5);
     scene.add(light);
 
-	// These are shader variables that work with the post processing effects
-	renderPass = new THREE.RenderPass( scene, camera );
-	hBlur = new THREE.ShaderPass( THREE.HorizontalTiltShiftShader );
-	vBlur = new THREE.ShaderPass( THREE.VerticalTiltShiftShader );
-	filmPass = new THREE.ShaderPass( THREE.FilmShader );
-	effectVignette = new THREE.ShaderPass( THREE.VignetteShader );
-	copyPass = new THREE.ShaderPass( THREE.CopyShader );
-		//Above effects stack up in the Three Effects composer and get displayed through renderer
-		//below add processing effects.
+	//POST PROCESSING
+    //Create Shader Passes
+    renderPass = new THREE.RenderPass(scene, camera);
+    hblur = new THREE.ShaderPass(THREE.HorizontalTiltShiftShader);
+    vblur = new THREE.ShaderPass(THREE.VerticalTiltShiftShader);
+    filmPass = new THREE.ShaderPass(THREE.FilmShader);
+    effectVignette = new THREE.ShaderPass(THREE.VignetteShader);
+    copyPass = new THREE.ShaderPass(THREE.CopyShader);
+
+	//Above effects stack up in the Three Effects composer and get displayed through renderer
+	//below add processing effects.
 	composer = new THREE.EffectComposer(renderer);
     composer.addPass(renderPass);
     composer.addPass(hblur);
@@ -98,9 +100,9 @@ function init() {
 		dae.scale.x = dae.scale.y = dae.scale.z = 0.5;
 		dae.updateMatrix();
 		group.add(dae);
-		water = scene.getObjectByName("water", true );
+		water = scene.getObjectByName("Water", true );
 		water = water.children[0];
-		light = scene.getObjectByName("spLight", true );
+		light = scene.getObjectByName("SpLight", true );
 		light = light.children[0];
 		// light controls and settings
 		light.target.position.set( 0, 0, 0 );
@@ -124,8 +126,8 @@ function init() {
  	// render fuction set frame rate to 60 fps if possible, the models rotate slowly as a group and camera 
  	//position rendering is updated with each mouse movement while staying locked to center.
  	function render() {
- 		requestAnimationFrame( renderer );
- 		group.rotate.y += 0.005;
+ 		requestAnimationFrame(render);
+ 		group.rotation.y += 0.005;
  		camera.position.x += 5 + ( (mouseX / 4) + 200 - camera.position.x ) * 0.05;
  		camera.position.y += 8 + ( -(mouseY / 4) - camera.position.y ) * 0.05;
  		camera.lookAt( scene.position );
@@ -134,3 +136,87 @@ function init() {
  		composer.render( 0.1 );
  		TWEEN.update();
  	}
+
+ 	init();
+
+ 	// input slider on html document calls showVal and scales water larger if slider is moved. It tweens over 0.8 sec
+ 	function showVal(val) {
+ 		if ( val != lastVal ) {
+ 			if (val > lastVal) {
+                    new TWEEN.Tween(group.children[val].scale).to({
+                        x: 1,
+                        y: 1,
+                        z: 1
+                    }, 800).easing(TWEEN.Easing.Quadratic.InOut).start();
+
+ 				waterHt += 0.07;
+ 				new TWEEN.Tween(water.scale).to({
+ 					y: waterHt
+ 				}, 800).easing(TWEEN.Easing.Quadratic.InOut).start();
+
+ 				// temp var finds select tree groups and scales them to zero as slider moves indicating global warming
+ 				var temp = scene.getObjectByName( "TreeG" + val, true );
+ 				new TWEEN.Tween(temp.scale).to({
+ 					y: 0.001
+ 				}, 1000).easing(TWEEN.Easing.Elastic.InOut).start();
+ 			}else{
+ 				new TWEEN.Tween(group.children[lastVal].scale).to({
+ 					x: 0.001,
+ 					y: 0.001,
+ 					z: 0.001
+ 				}, 800).easing(TWEEN.Easing.Quadratic.InOut).start();
+ 				waterHt -= 0.07;
+ 				new TWEEN.Tween(water.scale).to({
+ 					y: waterHt
+ 				}, 800).easing(TWEEN.Easing.Quadratic.InOut).start();
+ 				var temp = scene.getObjectByName( "TreeG" + lastVal, true );
+ 				new TWEEN.Tween(temp.scale).to({
+ 					y: 1
+ 				}, 1000).easing(TWEEN.Easing.Elastic.InOut).start();
+ 			}
+ 			lastVal = val;
+ 			//From Above else statement checks to see if slider is reversed backwards
+ 		}
+ 	}
+
+ 	function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onDocumentMouseMove(event) {
+    	mouseX = event.clientX - windowHalfX;
+    	mouseY = event.clientY - windowHalfY;
+    }
+
+    function onDocumentTouchStart(event) {
+    	if ( event.touches.length > 1 ) {
+    		event.preventDefault();
+    		mouseX = event.touches[0].pageX - windowHalfX;
+    		mouseY = event.touches[0].pageY - windowHalfY;
+    	}
+    }
+
+    function onDocumentTouchMove(event) {
+    	if ( event.touches.length == 1 ) {
+    		event.preventDefault();
+    		mouseX = event.touches[0].pageX - windowHalfX;
+    		mouseY = event.touches[0].pageY - windowHalfY;
+    	}
+    }
+
+    function params() {
+    	var bluriness = 5;
+    	hblur.uniforms['h'].value = bluriness / window.innerWidth;
+    	vblur.uniforms['v'].value = bluriness / window.innerHeight;
+    	hblur.uniforms['r'].value = vblur.uniforms['r'].value = 0.5;
+    	filmPass.uniforms.grayscale.value = 0;
+    	filmPass.uniforms['sCount'].value = 0;
+    	filmPass.uniforms['sIntensity'].value = 0.4;
+    	filmPass.uniforms['nIntensity'].value = 0.4;
+    	effectVignette.uniforms["offset"].value = 0.95;
+    	effectVignette.uniforms["darkness"].value = 1.8;
+    }
